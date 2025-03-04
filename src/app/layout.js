@@ -5,6 +5,7 @@ import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,7 @@ const AppContent = ({ children }) => {
 export default function RootLayout({ children }) {
   return (
     <AuthProvider>
+      <Toaster/>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
           <AppContent>{children}</AppContent>

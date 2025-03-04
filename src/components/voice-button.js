@@ -39,12 +39,12 @@ const VoiceButton = () => {
             </button>
           </div>
 
-          {/* <button
+          <button
             onClick={handleConfirm}
             className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg animate-fadeIn transition-transform hover:scale-110 active:scale-90"
           >
             <Check size={24} />
-          </button> */}
+          </button>
         </div>
       )}
     </div>
