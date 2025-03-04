@@ -382,6 +382,7 @@ export default function Home() {
         <div className="flex justify-center items-center mb-8">
           <VoiceButton />
         </div>
+        {/* <div></div> */}
       </div>
     </div>
   );
