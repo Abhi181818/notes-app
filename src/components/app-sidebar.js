@@ -1,3 +1,4 @@
+"use client";
 import {
   Calendar,
   Home,
@@ -19,6 +20,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/use-auth";
+import toast from "react-hot-toast";
 
 const items = [
   {
@@ -46,14 +49,17 @@ const items = [
     url: "/settings",
     icon: Settings,
   },
-  {
-    title: "Logout",
-    url: "/logout",
-    icon: LogOutIcon,
-  },
 ];
 
 export function AppSidebar() {
+  const { logout } = useAuth();
+
+  const handleLogout = (e) => {
+    e.preventDefault();
+    logout();
+    toast.success("Logged out successfully");
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -66,12 +72,19 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <a href={item.url}>
                       <item.icon />
-                              <span>{item.title}</span>
-                              
+                      <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem key="Logout" className="text-red-800 font-bold">
+                <SidebarMenuButton asChild>
+                  <a href="#" onClick={handleLogout}>
+                    <LogOutIcon />
+                    <span>Logout</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

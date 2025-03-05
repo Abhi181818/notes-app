@@ -41,7 +41,7 @@ const AppContent = ({ children }) => {
 export default function RootLayout({ children }) {
   return (
     <AuthProvider>
-      <Toaster/>
+      <Toaster />
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable}`}>
           <AppContent>{children}</AppContent>

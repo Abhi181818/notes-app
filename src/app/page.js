@@ -205,8 +205,8 @@ export default function Home() {
 
   return (
     <div className="flex h-screen">
-      <div className="w-1/4 border-r border-gray-300">
-        <SidebarProvider>
+      <div className=" border-r border-gray-300">
+        <SidebarProvider defaultOpen={true} position="left">
           <AppSidebar />
           <SidebarTrigger />
         </SidebarProvider>
@@ -225,7 +225,7 @@ export default function Home() {
           </button>
         </div>
         <div className="flex flex-1 gap-8 mt-4">
-          <div className="w-1/2 border-r border-gray-300 p-6">
+          <div className="w-1/3 border-r border-gray-300 p-6">
             <h1 className="text-2xl font-bold mb-4 border-b p-2 flex justify-between items-center">
               Your notes
               <span className="text-sm text-gray-500 font-normal">
