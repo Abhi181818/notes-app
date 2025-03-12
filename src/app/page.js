@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import VoiceButton from "@/components/voice-button";
+// import VoiceButton from "@/components/voice-button";
 import { useAuth } from "@/hooks/use-auth";
 import { AppSidebar } from "@/components/app-sidebar";
 import { useRouter } from "next/navigation";
@@ -18,8 +18,26 @@ import {
   addDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { BookmarkIcon, Edit, Trash, Plus } from "lucide-react";
+import {
+  BookmarkIcon,
+  Edit,
+  Trash,
+  Plus,
+  DeleteIcon,
+  Star,
+  Search,
+  Share,
+  ShareIcon,
+  Share2Icon,
+  Lightbulb,
+  LightbulbOff,
+  LightbulbIcon,
+} from "lucide-react";
 import { toast } from "react-hot-toast";
+// import { DotLottie } from "@lottiefiles/dotlottie-web";
+import { DotLottie, DotLottieReact } from "@lottiefiles/dotlottie-react";
+import VoiceTranscriptionModal from "@/components/voice-button";
+import { useTheme } from "@/hooks/theme";
 
 export default function Home() {
   const { user } = useAuth();
@@ -30,30 +48,46 @@ export default function Home() {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-
+  const [authLoading, setAuthLoading] = useState(true);
+  const [dotLottieRefs, setDotLottieRefs] = useState({});
+  const [searchText, setSearchText] = useState("");
+  const { isDark, setIsDark } = useTheme();
+  const setDotLottie = (id, ref) => {
+    setDotLottieRefs((prev) => ({ ...prev, [id]: ref }));
+  };
   const fetchNotes = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
+      setAuthLoading(false);
       const notesRef = collection(db, "notes");
-      const q = query(
-        notesRef,
-        where("userId", "==", user.uid),
-        orderBy("createdAt", "desc")
-      );
 
-      const querySnapshot = await getDocs(q);
-      const notesList = [];
+      let q = query(notesRef, where("userId", "==", user.uid));
 
-      querySnapshot.forEach((doc) => {
-        notesList.push({
+      if (searchText.trim() !== "") {
+        const querySnapshot = await getDocs(q);
+        const notesList = querySnapshot.docs
+          .map((doc) => ({ id: doc.id, ...doc.data() }))
+          .filter(
+            (note) =>
+              note.title
+                .toLowerCase()
+                .includes(searchText.trim().toLowerCase()) ||
+              note.content
+                .toLowerCase()
+                .includes(searchText.trim().toLowerCase())
+          );
+        setNotes(notesList);
+      } else {
+        q = query(q, orderBy("createdAt", "desc"));
+        const querySnapshot = await getDocs(q);
+        const notesList = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        });
-      });
-
-      setNotes(notesList);
+        }));
+        setNotes(notesList);
+      }
     } catch (error) {
       console.error("Error fetching notes:", error);
       toast.error("Failed to load notes");
@@ -66,7 +100,7 @@ export default function Home() {
     if (user) {
       fetchNotes();
     }
-  }, [user]);
+  }, [user, searchText]);
 
   const handleNoteSelect = (note) => {
     setSelectedNote(note);
@@ -186,9 +220,22 @@ export default function Home() {
     }
   };
 
-  if (!user) {
+  if (authLoading) {
     return (
       <div className="container mx-auto flex items-center justify-center h-screen p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <DotLottieReact src="/loading.lottie" autoplay loop />
+          </div>
+          <p className="text-lg text-gray-600">Loading your notes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto flex items-center justify-center h-screen">
         <div className="text-center max-w-md">
           <h1 className="text-4xl font-bold mb-4">Welcome to Notes App</h1>
           <p className="text-lg text-gray-600 mb-6">Please login to continue</p>
@@ -204,29 +251,53 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className={`flex h-screen ${isDark ? "bg-gray-800 " : "bg-white"}`}>
       <div className=" border-r border-gray-300">
-        <SidebarProvider defaultOpen={true} position="left">
+        <SidebarProvider
+          defaultOpen={true}
+          position="left"
+          className={`${isDark ? "bg-gray-700 hover:bg-gray-800" : "bg-white"}`}
+        >
           <AppSidebar />
           <SidebarTrigger />
         </SidebarProvider>
       </div>
-      <div className="flex-1 flex flex-col justify-between p-8">
+      <div className="flex-1 flex flex-col justify-between pt-2 pl-2 pr-2">
         <div className="flex justify-between items-center border-b pb-4">
-          <span className="font-bold text-lg">
+          <span
+            className={`font-bold text-lg ${
+              isDark ? "text-white" : "text-black"
+            }`}
+          >
             Welcome, <span className="text-blue-600">{user.displayName}</span>
           </span>
+          <div className="p-3 overflow-hidden w-[50px] h-[50px] hover:w-[270px] bg-[#2b7fff] shadow-[2px_2px_20px_rgba(0,0,0,0.08)] rounded-full flex group items-center hover:duration-300 duration-300">
+            <div className="flex items-center justify-center fill-white">
+              <Search className="text-white " />
+            </div>
+            <input
+              type="text"
+              className="outline-none text-[20px] bg-transparent w-full text-white font-normal px-4"
+              placeholder="Search anything.."
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
           <button
             className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
             onClick={handleCreateNote}
           >
-            <Plus size={16} />
+            {/* <Plus size={16} /> */}
             New Note
           </button>
+          <VoiceTranscriptionModal updateNotes={setNotes} />
         </div>
-        <div className="flex flex-1 gap-8 mt-4">
-          <div className="w-1/3 border-r border-gray-300 p-6">
-            <h1 className="text-2xl font-bold mb-4 border-b p-2 flex justify-between items-center">
+        <div
+          className={`flex flex-1 ${
+            isDark ? "bg-gray-800 text-white" : "bg-white"
+          }`}
+        >
+          <div className="w-1/2 border-r border-gray-300 pr-4">
+            <h1 className="text-2xl font-bold mb-4  p-2 flex justify-between items-center ">
               Your notes
               <span className="text-sm text-gray-500 font-normal">
                 {notes.length} notes
@@ -248,70 +319,118 @@ export default function Home() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 overflow-y-auto max-h-[calc(100vh-250px)]">
+              <div
+                className={`space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] ${
+                  isDark ? "bg-gray-800" : "bg-white"
+                }`}
+              >
                 {notes.map((note) => (
                   <div
                     key={note.id}
-                    className={`p-4 rounded-lg cursor-pointer transition-colors ${
+                    className={`p-4 rounded-lg border-b-2  cursor-pointer transition-colors ${
                       selectedNote?.id === note.id
-                        ? "bg-blue-100 border-blue-300 border"
-                        : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
+                        ? "bg-blue-100 border-blue-300 border-b-4"
+                        : "bg-gray-50  border border-gray-200"
+                    } ${
+                      isDark
+                        ? "bg-gray-800 hover:bg-gray-900"
+                        : "bg-gray-100 hover:bg-gray-200"
                     }`}
                     onClick={() => handleNoteSelect(note)}
                   >
-                    <div className="font-medium truncate flex justify-between items-center">
-                      <h3 className="flex-1 truncate">
+                    <div
+                      className={`font-medium flex justify-between items-center rounded-lg  border border-gray-100 ${
+                        isDark ? "bg-gray-800" : "bg-white"
+                      }`}
+                    >
+                      <h3
+                        className={`flex-1 truncate pl-2 ${
+                          isDark ? "text-white" : "text-gray-800"
+                        }`}
+                      >
                         {note.title || "Untitled Note"}
                       </h3>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 ml-4">
+                        <button
+                          onClick={(e) => handleEditNote()}
+                          className="text-blue-500 hover:text-blue-600 transition-colors p-1.5 rounded-full hover:bg-blue-50"
+                          title="Edit this note"
+                        >
+                          <Edit size={18} />
+                        </button>
                         <button
                           onClick={(e) => handleToggleBookmark(note, e)}
-                          className="text-gray-500 hover:text-violet-600 transition-colors"
+                          className="text-gray-400 hover:text-violet-600 transition-colors p-1.5 rounded-full hover:bg-violet-50"
                           title={
                             note.isBookMarked
                               ? "Remove bookmark"
                               : "Bookmark this note"
                           }
                         >
-                          <BookmarkIcon
+                          <Star
                             size={18}
-                            fill={note.isBookMarked ? "violet" : "none"}
-                            fillOpacity={note.isBookMarked ? 0.9 : 0}
+                            fill={note.isBookMarked ? "currentColor" : "none"}
+                            className={note.isBookMarked ? "text-red-500" : ""}
+                          />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteNote()}
+                          className="text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 mb-1"
+                          title="Delete this note"
+                        >
+                          <DotLottieReact
+                            id={note.id}
+                            src="https://lottie.host/eef765d8-c910-4226-85f3-cb76905020d0/8r9K6gZ8kY.lottie"
+                            height="18px"
+                            width="18px"
+                            autoPlay={false}
+                            loop={false}
+                            onMouseEnter={() => dotLottieRefs[note.id]?.play()}
+                            onMouseLeave={() => dotLottieRefs[note.id]?.stop()}
+                            dotLottieRefCallback={(ref) =>
+                              setDotLottie(note.id, ref)
+                            }
                           />
                         </button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-500 truncate mt-1">
+                    <p className="text-sm text-gray-400 truncate mt-1">
                       {note.content
                         ? note.content.substring(0, 100)
                         : "No content"}
                     </p>
-                    <div className="text-xs text-gray-400 mt-2">
+                    {/* <div className="text-xs text-gray-400 mt-2">
                       {note.createdAt?.toDate
                         ? note.createdAt.toDate().toLocaleDateString()
                         : "Unknown date"}
-                    </div>
+                    </div> */}
                   </div>
                 ))}
               </div>
             )}
           </div>
-          <div className="w-1/2 p-6">
-            <h1 className="text-2xl font-bold mb-4 border-b p-2">
+          <div className="w-full pl-4">
+            <h1 className="text-2xl font-bold mb-4 p-2">
               {isEditing ? "Edit Note" : "Details"}
             </h1>
             {selectedNote ? (
               isEditing ? (
-                <div className="bg-white rounded-lg shadow p-6 h-[calc(100vh-250px)] flex flex-col">
+                <div
+                  className={`rounded-lg shadow p-6 h-[calc(100vh-250px)] flex flex-col ${
+                    isDark ? "bg-gray-800" : "bg-white"
+                  }`}
+                >
                   <input
                     type="text"
-                    value={editedTitle}
+                    value={editedTitle == "Title" ? "" : editedTitle}
                     onChange={(e) => setEditedTitle(e.target.value)}
                     className="text-xl font-bold mb-4 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Title"
                   />
                   <textarea
-                    value={editedContent}
+                    value={
+                      editedContent === "Start typing here..." ? "" : "abe likh"
+                    }
                     onChange={(e) => setEditedContent(e.target.value)}
                     className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Your note content..."
@@ -332,7 +451,25 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-white rounded-lg shadow p-6">
+                <div
+                  className={`rounded-lg shadow p-6 border-1 ${
+                    isDark ? "bg-gray-800" : "bg-white"
+                  }`}
+                >
+                  <div className="absolute right-4">
+                    <button
+                      className="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-full text-sm"
+                      onClick={handleDeleteNote}
+                    >
+                      <Trash size={16} />
+                    </button>
+                    <button
+                      className="bg-purple-100 text-purple-600 hover:bg-purple-200 px-4 py-2 rounded-full text-sm ml-2 "
+                      // onClick={handleShareNote}
+                    >
+                      <Share2Icon size={16} />
+                    </button>
+                  </div>
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-bold mb-2">
                       {selectedNote.title || "Untitled Note"}
@@ -361,29 +498,33 @@ export default function Home() {
                       <Edit size={16} />
                       Edit Note
                     </button>
-                    <button
-                      className="flex items-center gap-2 bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-md text-sm"
-                      onClick={handleDeleteNote}
-                    >
-                      <Trash size={16} />
-                      Delete
-                    </button>
                   </div>
                 </div>
               )
             ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div
+                className={`flex items-center justify-center h-64 rounded-lg border border-dashed border-gray-300 ${
+                  isDark ? "bg-gray-700" : "bg-gray-50"
+                }`}
+              >
                 <p className="text-gray-400">Select a note to view details</p>
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex justify-center items-center mb-8">
-          <VoiceButton />
-        </div>
+        {/* <div className="flex justify-center items-center mb-8"> */}
+        {/* </div> */}
         {/* <div></div> */}
       </div>
+      <button
+        className="fixed bottom-4 right-4 bg-white hover:bg-gray-200 text-black px-4 py-2 rounded-full shadow-lg"
+        onClick={(e) => {
+          setIsDark(!isDark);
+        }}
+      >
+        {!isDark ? <LightbulbIcon /> : <LightbulbOff />}
+      </button>
     </div>
   );
 }

@@ -7,13 +7,14 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const VoiceTranscription = () => {
+const VoiceTranscription = ({ updateNotes }) => {
   const [isListening, setIsListening] = useState(false);
   const [transcription, setTranscription] = useState("");
   const [recognition, setRecognition] = useState(null);
   const { user } = useAuth();
   const [generatedTitle, setGeneratedTitle] = useState("");
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [showDialog, setShowDialog] = useState(false); // State to control dialog visibility
 
   // Create speech recognition instance
   useEffect(() => {
@@ -24,7 +25,7 @@ const VoiceTranscription = () => {
 
       recognitionInstance.continuous = true;
       recognitionInstance.interimResults = true;
-      recognitionInstance.lang = "en-US";
+      recognitionInstance.lang = "hi";
 
       recognitionInstance.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -53,6 +54,7 @@ const VoiceTranscription = () => {
         setIsListening(true);
         setTranscription("");
         setGeneratedTitle("");
+        setShowDialog(true); // Show dialog when mic starts
       } catch (error) {
         console.error("Error starting speech recognition:", error);
         toast.error("Failed to start speech recognition");
@@ -67,6 +69,7 @@ const VoiceTranscription = () => {
       setIsListening(false);
       setTranscription("");
       setGeneratedTitle("");
+      setShowDialog(false); // Hide dialog when stopped
     }
   }, [recognition]);
 
@@ -79,65 +82,43 @@ const VoiceTranscription = () => {
 
     setIsGeneratingTitle(true);
     try {
-      // Ensure API key is available
       const apiKey = "AIzaSyCK-WnkK3bSENw3bLAcefhH3Hv4Uj7vQwA";
       if (!apiKey) {
         throw new Error("Gemini API key is not configured");
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-pro" }); // Changed to gemini-pro
-      const prompt = `Generate a concise 2-3 word title that captures the essence of this text: "${transcription}"`;
-
-      console.log("Generating title with prompt:", prompt); // Debugging log
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const prompt = `strictly Generate a single, concise 2-3 word title that captures the essence of this text in hte same language it is given in: "${transcription}"`;
 
       const result = await model.generateContent(prompt);
       const title = result.response.text().trim();
+      const newTitle = title.substring(1, title.length - 2);
 
-      console.log("Generated title:", title); // Debugging log
-
-      setGeneratedTitle(title);
+      setGeneratedTitle(newTitle);
       return title;
     } catch (error) {
-      console.error("Detailed error generating title:", error);
-
-      // More specific error handling
-      if (error instanceof Error) {
-        if (error.message.includes("API key")) {
-          toast.error(
-            "Gemini API key is missing. Please check your configuration."
-          );
-        } else if (error.message.includes("fetch")) {
-          toast.error("Network error. Please check your internet connection.");
-        } else {
-          toast.error(`Failed to generate title: ${error.message}`);
-        }
-      } else {
-        toast.error("An unexpected error occurred while generating title");
-      }
-
-      return null;
+      console.error("Error generating title:", error);
+      toast.error("Failed to generate title");
     } finally {
       setIsGeneratingTitle(false);
     }
   }, [transcription]);
 
-  // Confirm and save note
   const handleConfirm = useCallback(async () => {
     if (recognition) {
       recognition.stop();
       setIsListening(false);
-
-      // Validate transcription
       if (!transcription.trim()) {
         toast.error("No transcription available");
         return;
       }
 
       try {
-        // Generate title if not already generated
         const titleToUse =
-          generatedTitle || (await handleGetTitle()) || "Untitled Note";
+          generatedTitle.substring(1, generatedTitle.length - 2) ||
+          (await handleGetTitle()) ||
+          "Untitled Note";
 
         const newNote = {
           userId: user?.uid,
@@ -148,15 +129,13 @@ const VoiceTranscription = () => {
           isBookMarked: false,
         };
 
-        // Add note to Firestore
         const docRef = await addDoc(collection(db, "notes"), newNote);
 
-        // Reset states
         setTranscription("");
         setGeneratedTitle("");
 
-        // Show success toast
         toast.success("New note created successfully");
+        updateNotes((prev) => [...prev, newNote]);
       } catch (error) {
         console.error("Error creating note:", error);
         toast.error("Failed to create note");
@@ -165,27 +144,36 @@ const VoiceTranscription = () => {
   }, [recognition, transcription, generatedTitle, user, handleGetTitle]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 max-w-md mx-auto">
-      {/* Transcription Display */}
-      <div className="w-full mb-4 p-3 border rounded-lg min-h-[150px] bg-gray-50">
+    <div className="flex flex-col">
+      {/* Transcription Container */}
+      {/* <div className="p-3 border rounded-lg bg-gray-50">
         <p
           className={`text-gray-600 ${transcription ? "text-black" : "italic"}`}
         >
           {transcription || "Transcription will appear here..."}
         </p>
-      </div>
+      </div> */}
 
-      {/* Generated Title Display */}
-      {generatedTitle && (
-        <div className="w-full mb-4 p-2 bg-blue-50 rounded-lg text-center">
-          <p className="text-blue-700 font-semibold">
-            Generated Title: {generatedTitle}
-          </p>
+      {/* Dialog for displaying transcription */}
+      {showDialog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-60" style={{background:"none",backgroundColor:"#44464863"}}>
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full transform transition-all duration-300 ease-in-out scale-95 hover:scale-100">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Transcription
+            </h2>
+            <p className="text-gray-600 mb-4">{transcription}</p>
+            <button
+              onClick={() => setShowDialog(false)}
+              className="mt-4 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Voice Button Interface */}
-      <div className="flex items-center justify-center">
+      {/* Action Buttons */}
+      <div>
         {!isListening ? (
           <button
             onClick={handleStartListening}
@@ -196,21 +184,16 @@ const VoiceTranscription = () => {
           </button>
         ) : (
           <div className="flex space-x-4 items-center">
-            {/* Cancel Button */}
-            <div className="relative animate-fadeIn">
-              <div className="absolute -inset-2 rounded-full bg-red-400 opacity-75 animate-pulse" />
-              <button
-                onClick={handleCancel}
-                className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full shadow-lg relative z-10 transition-transform hover:scale-110 active:scale-90"
-              >
-                <X size={24} />
-              </button>
-            </div>
+            <button
+              onClick={handleCancel}
+              className="bg-red-500 hover:bg-red-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-90"
+            >
+              <X size={24} />
+            </button>
 
-            {/* Confirm Button */}
             <button
               onClick={handleConfirm}
-              className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg animate-fadeIn transition-transform hover:scale-110 active:scale-90"
+              className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-110 active:scale-90"
               disabled={isGeneratingTitle || !transcription.trim()}
             >
               <Check size={24} />

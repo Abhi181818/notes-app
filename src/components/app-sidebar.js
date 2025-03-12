@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
 import toast from "react-hot-toast";
+import { useTheme } from "@/hooks/theme";
 
 const items = [
   {
@@ -39,11 +40,11 @@ const items = [
     url: "/notifications",
     icon: BellIcon,
   },
-  {
-    title: "Search",
-    url: "/search",
-    icon: Search,
-  },
+  // {
+  //   title: "Search",
+  //   url: "/search",
+  //   icon: Search,
+  // },
   {
     title: "Profile Settings",
     url: "/settings",
@@ -59,14 +60,17 @@ export function AppSidebar() {
     logout();
     toast.success("Logged out successfully");
   };
+  const { isDark, setIsDark } = useTheme();
 
   return (
-    <Sidebar>
+    <Sidebar
+      className={`w-64 shadow-lg ${isDark ? "bg-gray-800" : "bg-white"}`}
+    >
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Categories</SidebarGroupLabel>
+        <SidebarGroup className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}>
+          <SidebarGroupLabel className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}>Categories</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className={`${isDark ? "bg-gray-800 text-gray-100 " : "bg-white"}`}>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
