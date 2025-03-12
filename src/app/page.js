@@ -32,12 +32,14 @@ import {
   Lightbulb,
   LightbulbOff,
   LightbulbIcon,
+  Languages,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 // import { DotLottie } from "@lottiefiles/dotlottie-web";
 import { DotLottie, DotLottieReact } from "@lottiefiles/dotlottie-react";
 import VoiceTranscriptionModal from "@/components/voice-button";
 import { useTheme } from "@/hooks/theme";
+import TranslatedContent from "@/components/translated-content";
 
 export default function Home() {
   const { user } = useAuth();
@@ -475,7 +477,7 @@ export default function Home() {
                       {selectedNote.title || "Untitled Note"}
                     </h2>
                     {selectedNote.isBookMarked && (
-                      <span className="bg-violet-100 text-violet-800 text-xs px-2 py-1 rounded-full">
+                      <span className="bg-violet-100 text-violet-800 text-xs px-2 py-1 rounded-full mt-10">
                         Bookmarked
                       </span>
                     )}
@@ -498,6 +500,14 @@ export default function Home() {
                       <Edit size={16} />
                       Edit Note
                     </button>
+                    <button
+                      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
+                        // onClick={() => { <TranslatedContent /> }}
+                    >
+                      <Languages size={16} />
+                        Translate
+                      </button>
+                      <TranslatedContent contentToTranslate={ selectedNote.content} />
                   </div>
                 </div>
               )
