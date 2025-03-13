@@ -46,23 +46,41 @@ export default function Home() {
   const router = useRouter();
   const [notes, setNotes] = useState([]);
   const [selectedNote, setSelectedNote] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Set to false initially
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
   const [dotLottieRefs, setDotLottieRefs] = useState({});
   const [searchText, setSearchText] = useState("");
   const { isDark, setIsDark } = useTheme();
+  const [authChecked, setAuthChecked] = useState(false);
+
   const setDotLottie = (id, ref) => {
     setDotLottieRefs((prev) => ({ ...prev, [id]: ref }));
   };
+
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      setAuthLoading(true); // Start loading
+      if (!user) {
+        setAuthLoading(false);
+        setAuthChecked(true);
+        return;
+      }
+      await fetchNotes();
+      setAuthLoading(false);
+      setAuthChecked(true);
+    };
+
+    checkAuthStatus();
+  }, [user]);
+
   const fetchNotes = async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      setAuthLoading(false);
       const notesRef = collection(db, "notes");
 
       let q = query(notesRef, where("userId", "==", user.uid));
@@ -98,12 +116,28 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchNotes();
-    }
-  }, [user, searchText]);
+  // useEffect(() => {
+  //   if (user) {
+  //     fetchNotes();
+  //   }
+  // }, [user, searchText]);
 
+  if (!authChecked) {
+    return (
+      <div
+        className={`container mx-auto flex items-center justify-center h-screen ${
+          isDark ? "bg-gray-800" : "bg-white"
+        }`}
+      >
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <DotLottieReact src="/loading.lottie" autoplay loop />
+          </div>
+          <p className="text-lg text-gray-600">Loading your notes...</p>
+        </div>
+      </div>
+    );
+  }
   const handleNoteSelect = (note) => {
     setSelectedNote(note);
     setIsEditing(false);
@@ -180,7 +214,6 @@ export default function Home() {
 
   const handleDeleteNote = async () => {
     if (!selectedNote) return;
-
     if (window.confirm("Are you sure you want to delete this note?")) {
       try {
         await deleteDoc(doc(db, "notes", selectedNote.id));
@@ -380,7 +413,7 @@ export default function Home() {
                           />
                         </button>
                         <button
-                          onClick={(e) => handleDeleteNote()}
+                          onClick={() => handleDeleteNote()}
                           className="text-gray-400 hover:text-red-500 transition-colors rounded-full hover:bg-red-50 mb-1"
                           title="Delete this note"
                         >
