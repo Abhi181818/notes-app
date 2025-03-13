@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { useTheme } from "@/hooks/theme";
 
 const VoiceTranscription = ({ updateNotes }) => {
   const [isListening, setIsListening] = useState(false);
@@ -16,37 +17,39 @@ const VoiceTranscription = ({ updateNotes }) => {
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const [showDialog, setShowDialog] = useState(false); // State to control dialog visibility
 
+  const { isDark } = useTheme();
+
   // Create speech recognition instance
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognitionInstance = new SpeechRecognition();
+      const recognitionNew = new SpeechRecognition();
 
-      recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
-      recognitionInstance.lang = "hi";
+      recognitionNew.continuous = true;
+      recognitionNew.interimResults = true;
+      recognitionNew.lang = "hi";
 
-      recognitionInstance.onresult = (event) => {
-        const transcript = Array.from(event.results)
+      recognitionNew.onresult = (e) => {
+        const transcript = Array.from(e.results)
           .map((result) => result[0].transcript)
           .join("");
 
         setTranscription(transcript);
       };
 
-      recognitionInstance.onerror = (event) => {
-        console.error("Speech recognition error:", event.error);
+      recognitionNew.onerror = (e) => {
+        console.error("Speech recognition error:", e.error);
         toast.error("Speech recognition error occurred");
       };
 
-      setRecognition(recognitionInstance);
+      setRecognition(recognitionNew);
     } else {
       toast.error("Speech recognition not supported in this browser");
     }
   }, []);
 
-  // Start listening
+  // start listening
   const handleStartListening = useCallback(() => {
     if (recognition) {
       try {
@@ -54,7 +57,7 @@ const VoiceTranscription = ({ updateNotes }) => {
         setIsListening(true);
         setTranscription("");
         setGeneratedTitle("");
-        setShowDialog(true); // Show dialog when mic starts
+        setShowDialog(true);
       } catch (error) {
         console.error("Error starting speech recognition:", error);
         toast.error("Failed to start speech recognition");
@@ -62,18 +65,18 @@ const VoiceTranscription = ({ updateNotes }) => {
     }
   }, [recognition]);
 
-  // Cancel listening
+  // Cancel
   const handleCancel = useCallback(() => {
     if (recognition) {
       recognition.stop();
       setIsListening(false);
       setTranscription("");
       setGeneratedTitle("");
-      setShowDialog(false); // Hide dialog when stopped
+      setShowDialog(false);
     }
   }, [recognition]);
 
-  // Generate title using Gemini AI
+  // using Gemini to generate Title
   const handleGetTitle = useCallback(async () => {
     if (!transcription.trim()) {
       toast.error("No transcription available");
@@ -89,7 +92,7 @@ const VoiceTranscription = ({ updateNotes }) => {
 
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      const prompt = `strictly Generate a single, concise 2-3 word title that captures the essence of this text in hte same language it is given in: "${transcription}"`;
+      const prompt = `strictly Generate a single, concise 2-3 word title that captures the essence of this text in the same language it is given in: "${transcription}"`;
 
       const result = await model.generateContent(prompt);
       const title = result.response.text().trim();
@@ -105,6 +108,7 @@ const VoiceTranscription = ({ updateNotes }) => {
     }
   }, [transcription]);
 
+  // 
   const handleConfirm = useCallback(async () => {
     if (recognition) {
       recognition.stop();
@@ -156,12 +160,23 @@ const VoiceTranscription = ({ updateNotes }) => {
 
       {/* Dialog for displaying transcription */}
       {showDialog && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-900 bg-opacity-60" style={{background:"none",backgroundColor:"#44464863"}}>
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full transform transition-all duration-300 ease-in-out scale-95 hover:scale-100">
+        <div
+          className={`fixed inset-0 flex items-center justify-center z-50 bg-opacity-60 ${
+            isDark ? "bg-gray-600" : "bg-white"
+          }`}
+          style={{ background: "none", backgroundColor: "#44464863" }}
+        >
+          <div
+            className={` p-6 rounded-lg shadow-lg max-w-sm w-full transform transition-all duration-300 ease-in-out scale-95 hover:scale-100 ${
+              isDark ? "bg-gray-600 text-white" : "bg-white text-gray-800"
+            }`}
+          >
             <h2 className="text-xl font-semibold mb-4 text-center">
               Transcription
             </h2>
-            <p className="text-gray-600 mb-4">{transcription}</p>
+            <p className={` mb-4 ${isDark ? "text-white" : "text-gray-800"}`}>
+              asasa{transcription}
+            </p>
             <button
               onClick={() => setShowDialog(false)}
               className="mt-4 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full"
@@ -171,7 +186,6 @@ const VoiceTranscription = ({ updateNotes }) => {
           </div>
         </div>
       )}
-
       {/* Action Buttons */}
       <div>
         {!isListening ? (

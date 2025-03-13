@@ -75,10 +75,12 @@ const TranslatedContent = ({ contentToTranslate }) => {
           onChange={(e) => setLanguage(e.target.value)}
           value={language}
         >
+          <option value="Bhojpuri">Bhojpuri</option>
           <option value="Hindi">Hindi</option>
           <option value="English">English</option>
           <option value="Kannada">Kannada</option>
           <option value="Punjabi">Punjabi</option>
+          {/* <option value={}> */}
         </select>
       </div>
 

@@ -257,7 +257,6 @@ export default function Home() {
   }
 
   return (
-    
     <div className={`flex h-screen ${isDark ? "bg-gray-800 " : "bg-white"}`}>
       <div className=" border-r border-gray-300">
         <SidebarProvider
@@ -290,10 +289,10 @@ export default function Home() {
             />
           </div>
           <button
-            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition"
+            className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition border-b-4 hover:border-b-2"
             onClick={handleCreateNote}
           >
-            {/* <Plus size={16} /> */}
+            {/* <Plus size={16} className="hover:animate-spin" /> */}
             New Note
           </button>
           <VoiceTranscriptionModal updateNotes={setNotes} />
@@ -526,7 +525,7 @@ export default function Home() {
         {/* <div></div> */}
       </div>
       <button
-        className="fixed bottom-4 right-4 bg-white hover:bg-gray-200 text-black px-4 py-2 rounded-full shadow-lg"
+        className="fixed bottom-4 right-4 bg-white hover:bg-gray-200 text-black px-4 py-2 rounded-full shadow-lg border-b-4 hover:border-b-2"
         onClick={(e) => {
           setIsDark(!isDark);
         }}
