@@ -224,7 +224,11 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <div className="container mx-auto flex items-center justify-center h-screen p-4">
+      <div
+        className={`container mx-auto flex items-center justify-center h-screen p-4 ${
+          isDark ? "bg-gray-800" : "bg-white"
+        }`}
+      >
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-4">
             <DotLottieReact src="/loading.lottie" autoplay loop />
@@ -253,6 +257,7 @@ export default function Home() {
   }
 
   return (
+    
     <div className={`flex h-screen ${isDark ? "bg-gray-800 " : "bg-white"}`}>
       <div className=" border-r border-gray-300">
         <SidebarProvider
@@ -430,9 +435,7 @@ export default function Home() {
                     placeholder="Title"
                   />
                   <textarea
-                    value={
-                      editedContent === "Start typing here..." ? "" : "abe likh"
-                    }
+                    value={editedContent}
                     onChange={(e) => setEditedContent(e.target.value)}
                     className="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                     placeholder="Your note content..."
@@ -500,15 +503,10 @@ export default function Home() {
                       <Edit size={16} />
                       Edit Note
                     </button>
-                    <button
-                      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm"
-                        // onClick={() => { <TranslatedContent /> }}
-                    >
-                      <Languages size={16} />
-                        Translate
-                      </button>
-                      <TranslatedContent contentToTranslate={ selectedNote.content} />
                   </div>
+                  <TranslatedContent
+                    contentToTranslate={selectedNote.content}
+                  />
                 </div>
               )
             ) : (
