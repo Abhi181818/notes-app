@@ -495,7 +495,7 @@ export default function Home() {
                 >
                   <div className="absolute right-4">
                     <button
-                      className="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-full text-sm"
+                      className="bg-red-100 text-red-600 hover:bg-red-200 px-4 py-2 rounded-full text-sm border-b-4 hover:border-b-2"
                       onClick={handleDeleteNote}
                     >
                       <Trash size={16} />
