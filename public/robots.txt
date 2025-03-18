@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://notes-app-abhi.vercel.app
+
+# Sitemaps
+Sitemap: https://notes-app-abhi.vercel.app/sitemap.xml
