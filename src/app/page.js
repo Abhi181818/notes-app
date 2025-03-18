@@ -33,6 +33,9 @@ import {
   LightbulbOff,
   LightbulbIcon,
   Languages,
+  BookOpen,
+  LogIn,
+  Lock,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 // import { DotLottie } from "@lottiefiles/dotlottie-web";
@@ -40,6 +43,7 @@ import { DotLottie, DotLottieReact } from "@lottiefiles/dotlottie-react";
 import VoiceTranscriptionModal from "@/components/voice-button";
 import { useTheme } from "@/hooks/theme";
 import TranslatedContent from "@/components/translated-content";
+import Head from "next/head";
 
 export default function Home() {
   const { user } = useAuth();
@@ -274,16 +278,33 @@ export default function Home() {
 
   if (!user) {
     return (
-      <div className="container mx-auto flex items-center justify-center h-screen">
-        <div className="text-center max-w-md">
+      <div className="container mx-auto flex items-center justify-center h-screen bg-gray-50">
+        <div className="text-center max-w-md bg-white p-8 rounded-lg shadow-lg">
+          <div className="flex justify-center mb-6">
+            <div className="bg-green-100 p-4 rounded-full">
+              <BookOpen size={48} className="text-green-600" />
+            </div>
+          </div>
           <h1 className="text-4xl font-bold mb-4">Welcome to Notes App</h1>
-          <p className="text-lg text-gray-600 mb-6">Please login to continue</p>
-          <button
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-md shadow-lg transition-transform hover:scale-105 active:scale-95"
-            onClick={() => router.push("/auth")}
-          >
-            Login
-          </button>
+          <p className="text-lg text-gray-600 mb-8">
+            Your ideas, organized and secure
+          </p>
+          <div className="space-y-4">
+            <button
+              className="w-full bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-md shadow-md transition-all hover:shadow-lg flex items-center justify-center gap-2 group"
+              onClick={() => router.push("/auth")}
+            >
+              <LogIn
+                size={20}
+                className="group-hover:translate-x-1 transition-transform"
+              />
+              <span>Login</span>
+            </button>
+            <div className="flex items-center justify-center text-sm text-gray-500 mt-4">
+              <Lock size={14} className="mr-1" />
+              <span>Secure authentication</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -344,7 +365,7 @@ export default function Home() {
             </h1>
 
             {loading ? (
-              <div className="flex justify-center items-center h-64">
+              <div className="flex justify-center items-center ">
                 <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
               </div>
             ) : notes.length === 0 ? (
@@ -359,7 +380,7 @@ export default function Home() {
               </div>
             ) : (
               <div
-                className={`space-y-3 overflow-y-auto max-h-[calc(100vh-250px)] ${
+                className={`space-y-3 overflow-y-auto  ${
                   isDark ? "bg-gray-800" : "bg-white"
                 }`}
               >

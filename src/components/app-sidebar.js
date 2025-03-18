@@ -30,26 +30,16 @@ const items = [
     url: "/",
     icon: Home,
   },
-  {
-    title: "Your Notes",
-    url: "/your-notes",
-    icon: BookIcon,
-  },
-  {
-    title: "Notifications",
-    url: "/notifications",
-    icon: BellIcon,
-  },
   // {
   //   title: "Search",
   //   url: "/search",
   //   icon: Search,
   // },
-  {
-    title: "Profile Settings",
-    url: "/settings",
-    icon: Settings,
-  },
+  // {
+  //   title: "Profile Settings",
+  //   url: "/settings",
+  //   icon: Settings,
+  // },
 ];
 
 export function AppSidebar() {
@@ -67,10 +57,20 @@ export function AppSidebar() {
       className={`w-64 shadow-lg ${isDark ? "bg-gray-800" : "bg-white"}`}
     >
       <SidebarContent>
-        <SidebarGroup className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}>
-          <SidebarGroupLabel className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}>Categories</SidebarGroupLabel>
+        <SidebarGroup
+          className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}
+        >
+          <SidebarGroupLabel
+            className={`${isDark ? "bg-gray-800 text-gray-100" : "bg-white"}`}
+          >
+            Categories
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className={`${isDark ? "bg-gray-800 text-gray-100 " : "bg-white"}`}>
+            <SidebarMenu
+              className={`${
+                isDark ? "bg-gray-800 text-gray-100 " : "bg-white"
+              }`}
+            >
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
