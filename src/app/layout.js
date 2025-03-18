@@ -32,6 +32,12 @@ export default function RootLayout({ children }) {
         <Toaster />
         <html lang="en">
           <DynamicTitle />
+          <head>
+            <meta
+              name="google-site-verification"
+              content="zyFST-yppUMiy2xHAPNodmjmuafTgghQ35Z3IHrh2oo"
+            />
+          </head>
           <body>
             <AppContent>{children}</AppContent>
           </body>
