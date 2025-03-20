@@ -37,6 +37,10 @@ export default function RootLayout({ children }) {
               name="google-site-verification"
               content="zyFST-yppUMiy2xHAPNodmjmuafTgghQ35Z3IHrh2oo"
             />
+            <script
+              type="text/javascript"
+              src="//pl26165613.effectiveratecpm.com/47/68/e7/4768e74be5885fafaf08d82a6171d7a5.js"
+            ></script>
           </head>
           <body>
             <AppContent>{children}</AppContent>
