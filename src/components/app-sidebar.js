@@ -89,14 +89,6 @@ export function AppSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem key="ads">
-                <SidebarMenuButton asChild>
-                  <a href="https://www.effectiveratecpm.com/xxv7a2s7?key=beaba4fdf2e2c32ff633732bd8c329d1">
-                    {/* <LogOutIcon /> */}
-                    <span>click for ads</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

@@ -28,7 +28,7 @@ const VoiceTranscription = ({ updateNotes }) => {
 
       recognitionNew.continuous = true;
       recognitionNew.interimResults = true;
-      recognitionNew.lang = "hi";
+      recognitionNew.lang = "en-IN";
 
       recognitionNew.onresult = (e) => {
         const transcript = Array.from(e.results)
@@ -108,7 +108,7 @@ const VoiceTranscription = ({ updateNotes }) => {
     }
   }, [transcription]);
 
-  // 
+  //
   const handleConfirm = useCallback(async () => {
     if (recognition) {
       recognition.stop();
@@ -175,7 +175,7 @@ const VoiceTranscription = ({ updateNotes }) => {
               Transcription
             </h2>
             <p className={` mb-4 ${isDark ? "text-white" : "text-gray-800"}`}>
-              asasa{transcription}
+              {transcription}
             </p>
             <button
               onClick={() => setShowDialog(false)}
